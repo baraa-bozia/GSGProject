@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, UserRound, Sparkles, ShieldCheck } from 'lucide-react';
-
+import toast from 'react-hot-toast';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '');
 
 export default function AuthPage({ onAuthenticated }) {
@@ -38,10 +38,32 @@ export default function AuthPage({ onAuthenticated }) {
         const validationErrors = data.errors ? Object.values(data.errors).flat().join(' ') : '';
         throw new Error(validationErrors || data.message || (response.status === 401 ? 'Your credentials are incorrect.' : `Request failed (${response.status}).`));
       }
-      if (!data.token || !data.user) throw new Error('The API response did not include both a user and a token. Check the backend response format.');
-      sessionStorage.setItem('sparr_token', data.token);
-      sessionStorage.setItem('sparr_user', JSON.stringify(data.user));
-      onAuthenticated(data.user, data.token);
+      // if (!data.token || !data.user) throw new Error('The API response did not include both a user and a token. Check the backend response format.');
+      // sessionStorage.setItem('sparr_token', data.token);
+      // sessionStorage.setItem('sparr_user', JSON.stringify(data.user));
+      // onAuthenticated(data.user, data.token);
+      
+if (mode === 'register') {
+  setMode('login');
+  setName('');
+  setPassword('');
+  setPasswordConfirmation('');
+  setShowPassword(false);
+  toast.success('Account created successfully! Please sign in.');
+  return;
+}
+
+if (!data.token || !data.user) {
+  throw new Error(
+    'The API response did not include both a user and a token. Check the backend response format.'
+  );
+}
+
+sessionStorage.setItem('sparr_token', data.token);
+sessionStorage.setItem('sparr_user', JSON.stringify(data.user));
+onAuthenticated(data.user, data.token);
+
+
     } catch (err) {
       if (err instanceof TypeError) setError(`Could not connect to the backend at ${API_BASE_URL}. Check that Laravel is running, the API URL is correct, and CORS allows this frontend.`);
       else setError(err.message || 'Something went wrong. Please try again.');
